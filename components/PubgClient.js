@@ -1,59 +1,54 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-    useQuery,
-    useMutation,
-    useQueryClient,
-    QueryClient,
-    QueryClientProvider,
-} from '@tanstack/react-query'
-import axios from 'axios';
+import useDebounce from './useDebounce.js'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import axios from "axios";
 import { apiKey } from "./Keys";
 
-function usePlayers(){
-    return useQuery({
-        queryKey: ['pubgPlayer'],
-        queryFn: async () => {
-            const { data } = await axios.get(`https://api.pubg.com/shards/${platform}/players?filter[playerNames]=${player}`, {
-                method: 'GET',
-                headers: {
-                    Accept: "application/vnd.api+json",
-                    //authenticate the request
-                    Authorization: `Bearer ${apiKey}`,
-                },
-            }
-            )
-            return data;
-        }
-    })
-}
-
 function PubgClient() {
-    const [player, setPlayer] = useState('wetfire')
+    const [player, setPlayer] = useState(null)
     const [platform, setPlatform] = useState('steam')
-    const [region, setRegion] = useState('na')
-    const [state, setState] = useState({
-        playerData: {},
-    })
-    const queryClient = useQueryClient()
-    const { status, data, error, isFetching } = usePlayers();
+    const [matches, setMatches] = useState([])
+    const [searchQuery, setSearchQuery] = useState({ searchName: 'wetfire', searchPlatform: 'steam' })
 
-    useEffect((data) => {
-        if (isSuccess) {
-            setState({ playerData: data })
+    const fetchPlayer = (player, platform) => {
+        axios.get(`https://api.pubg.com/shards/${platform}/players?filter[playerNames]=${player}`, {
+            method: 'GET',
+            headers: {
+                Accept: "application/vnd.api+json",
+                Authorization: `Bearer ${apiKey}`,
+            },
         }
-    }, [data])
-
-    if (isFetching) return 'Loading...'
-
-    if (error) return 'An error has occured: ' + error.message
-
-    if (status == "success") {
-        console.log(state.playerData);
+        ).then((response) => {
+            setPlayer(response.data.data[0])
+            return response
+        }).catch(console.log)
     }
+
+    // const { isSuccess, status, data, isLoading, error } = useQuery(
+    //     ["fetchPlayer", searchQuery.searchName],
+    //     () => fetchPlayer(searchQuery.searchName, searchQuery.searchPlatform),
+    //     {
+    //         enabled: searchQuery.searchName.length > 0
+    //     }
+    // )
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        let thisPlayer = fetchPlayer(searchQuery.searchName, searchQuery.searchPlatform)
+        setPlayer(thisPlayer)
+    }
+
+    let playerName = ''
 
     return (
         <div>
-            <button>Get Players</button>
+            <form onSubmit={handleSubmit}>
+                <label>Search Players</label>
+                <input type="text" value={searchQuery.searchName} onChange={(e) => setSearchQuery(searchQuery.searchName = e.target.value)} />
+                <button type="submit">submit</button>
+                <div>{playerName}</div>
+                <button onClick={() => console.log(player)}>log</button>
+            </form>
         </div>
     )
 }
