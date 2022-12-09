@@ -6,19 +6,14 @@ import {
     QueryClient,
     QueryClientProvider,
 } from '@tanstack/react-query'
+import axios from 'axios';
 import { apiKey } from "./Keys";
-function PubgClient() {
-    const [player, setPlayer] = useState('wetfire')
-    const [platform, setPlatform] = useState('steam')
-    const [region, setRegion] = useState('na')
-    const [state, setState] = useState({
-        data: {},
-    })
 
-    const { isLoading, error, data, isSuccess } = useQuery({
+function usePlayers(){
+    return useQuery({
         queryKey: ['pubgPlayer'],
-        queryFn: () => {
-            fetch(`https://api.pubg.com/shards/${platform}/players?filter[playerNames]=${player}`, {
+        queryFn: async () => {
+            const { data } = await axios.get(`https://api.pubg.com/shards/${platform}/players?filter[playerNames]=${player}`, {
                 method: 'GET',
                 headers: {
                     Accept: "application/vnd.api+json",
@@ -26,25 +21,39 @@ function PubgClient() {
                     Authorization: `Bearer ${apiKey}`,
                 },
             }
-            ).then(res =>
-                res.json()
             )
+            return data;
         }
     })
+}
 
-    useEffect(() => {
+function PubgClient() {
+    const [player, setPlayer] = useState('wetfire')
+    const [platform, setPlatform] = useState('steam')
+    const [region, setRegion] = useState('na')
+    const [state, setState] = useState({
+        playerData: {},
+    })
+    const queryClient = useQueryClient()
+    const { status, data, error, isFetching } = usePlayers();
+
+    useEffect((data) => {
         if (isSuccess) {
-            setState({ data })
+            setState({ playerData: data })
         }
     }, [data])
 
-    if (isLoading) return 'Loading...'
+    if (isFetching) return 'Loading...'
 
     if (error) return 'An error has occured: ' + error.message
 
+    if (status == "success") {
+        console.log(state.playerData);
+    }
+
     return (
         <div>
-            <h1>{data[0]}</h1>
+            <button>Get Players</button>
         </div>
     )
 }
