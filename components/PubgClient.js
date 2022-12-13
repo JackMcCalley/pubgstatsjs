@@ -1,11 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import useDebounce from "./useDebounce.js";
 import getPlayer from "./getPlayer.js";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
 import axios from "axios";
 import { apiKey } from "./Keys";
 import { MatchCard } from "./MatchCard.js";
@@ -65,6 +60,7 @@ function PubgClient() {
         let participants = res.data.included;
         let thisPlayer = {};
         let roster = {};
+        let myTeam = {};
         //map through response to search for the queried player's team
         for (let i = 0; i < participants.length; i++) {
           if (
@@ -73,21 +69,28 @@ function PubgClient() {
           ) {
             //queried player id
             thisPlayer = participants[i].id;
+            //map through participants again looking for the roster with thisPlayer
             for (let l = 0; l < participants.length; l++) {
               if (participants[l].type == "roster") {
-                //queried player's team
+                //set roster to current team in for loop
                 roster = participants[l].relationships.participants.data;
+                //map through rosters looking for queried player's ID
                 for (let p = 0; p < roster.length; p++) {
                   if (roster[p].id == thisPlayer) {
-                    roster = roster[p]
-                  };
+                    //sets myRoster to the roster with queried player's ID
+                    myTeam = roster;
+                  }
                 }
               }
             }
           }
         }
-      });
+        return {myTeam, participants};
+      }).then((res) => {
+        //TODO: map through myTeam, then participants, to gather match data for each member of the team
+      })
   };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true);
@@ -109,7 +112,9 @@ function PubgClient() {
           SEARCH
         </button>
       </form>
-      <div>{loading ? "LOADING..." : fetched ? matches : "No Data"}</div>
+      <div>
+        {loading ? "LOADING..." : fetched ? `Match ID: ${matches}` : "No Data"}
+      </div>
       {fetched ? (
         <button style={styles.buttons} onClick={() => fetchMatch(matches)}>
           Get Matches
