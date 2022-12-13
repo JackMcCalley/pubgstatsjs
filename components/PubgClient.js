@@ -14,43 +14,85 @@ import Link from "next/link.js";
 function PubgClient() {
   const [player, setPlayer] = useState(null);
   const [platform, setPlatform] = useState("steam");
-  const [matches, setMatches] = useState([]);
+  const [matches, setMatches] = useState(null);
+  const [lastMatch, setLastMatch] = useState(null);
   const [searchName, setSearchName] = useState("wetfire");
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
   const nameRef = useRef(searchName);
 
-    const fetchPlayer = async (player, platform) => {
-      setLoading(true);
-      await axios
-        .get(
-          `https://api.pubg.com/shards/${platform}/players?filter[playerNames]=${player}`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/vnd.api+json",
-              Authorization: `Bearer ${apiKey}`,
-            },
-          }
-        )
-        .then((response) => {
-          setPlayer(response.data.data[0]);
-          setMatches(response.data.data[0].relationships.matches.data[0].id);
-          return response;
-        })
-        .catch(console.log);
-    };
+  const fetchPlayer = async (player, platform) => {
+    setLoading(true);
+    await axios
+      .get(
+        `https://api.pubg.com/shards/${platform}/players?filter[playerNames]=${player}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/vnd.api+json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+        }
+      )
+      .then((response) => {
+        setPlayer(response.data.data[0]);
+        setMatches(response.data.data[0].relationships.matches.data[0].id);
+        return response;
+      })
+      .catch(function (error) {
+        console.log(error.response.status);
+        setMatches(
+          error.response.status +
+            " Please Try Again. Note: Searches are case sensitive."
+        );
+      });
+    setFetched(true);
+    setLoading(false);
+  };
 
-  const handleSubmit = async (event) => {
+  const fetchMatch = async (matchId) => {
+    await axios
+      .get(`https://api.pubg.com/shards/${platform}/matches/${matchId}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/vnd.api+json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+      })
+      .then((res) => {
+        // console.log("Player ID: " + player.id);
+        // console.log(res.data.included);
+        let participants = res.data.included;
+        let thisPlayer = {};
+        let roster = {};
+        //map through response to search for the queried player's team
+        for (let i = 0; i < participants.length; i++) {
+          if (
+            participants[i].type == "participant" &&
+            participants[i].attributes.stats.playerId == player.id
+          ) {
+            //queried player id
+            thisPlayer = participants[i].id;
+            for (let l = 0; l < participants.length; l++) {
+              if (participants[l].type == "roster") {
+                //queried player's team
+                roster = participants[l].relationships.participants.data;
+                for (let p = 0; p < roster.length; p++) {
+                  if (roster[p].id == thisPlayer) {
+                    roster = roster[p]
+                  };
+                }
+              }
+            }
+          }
+        }
+      });
+  };
+  const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true);
-    try {
-        fetchPlayer(searchName, platform);
-    } catch {
-        setLoading(false)
-    }
-    setLoading(false)
-    setFetched(true)
+    setLoading(true);
+    fetchPlayer(searchName, platform);
   };
 
   const onChange = (e) => {
@@ -63,21 +105,30 @@ function PubgClient() {
       <form onSubmit={handleSubmit}>
         <label>Search Players</label>
         <input type="text" value={searchName} onChange={onChange} />
-        <button
-          style={{
-            width: "5rem",
-            backgroundColor: "white",
-            color: "black",
-          }}
-          disabled={loading}
-          type="submit"
-        >
+        <button style={styles.buttons} disabled={loading} type="submit">
           SEARCH
         </button>
       </form>
       <div>{loading ? "LOADING..." : fetched ? matches : "No Data"}</div>
+      {fetched ? (
+        <button style={styles.buttons} onClick={() => fetchMatch(matches)}>
+          Get Matches
+        </button>
+      ) : (
+        <button style={styles.buttons} disabled>
+          Get Matches
+        </button>
+      )}
     </div>
   );
 }
+
+const styles = {
+  buttons: {
+    width: "5rem",
+    backgroundColor: "white",
+    color: "black",
+  },
+};
 
 export default PubgClient;
