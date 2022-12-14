@@ -10,7 +10,7 @@ function PubgClient() {
   const [player, setPlayer] = useState(null);
   const [platform, setPlatform] = useState("steam");
   const [matches, setMatches] = useState(null);
-  const [lastMatch, setLastMatch] = useState(null);
+  const [lastMatchTeamData, setLastMatchTeamData] = useState([]);
   const [searchName, setSearchName] = useState("wetfire");
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
@@ -46,6 +46,7 @@ function PubgClient() {
   };
 
   const fetchMatch = async (matchId) => {
+    setLastMatchTeamData([])
     await axios
       .get(`https://api.pubg.com/shards/${platform}/matches/${matchId}`, {
         method: "GET",
@@ -85,15 +86,20 @@ function PubgClient() {
             }
           }
         }
-        return {myTeam, participants};
-      }).then((res) => {
-        //TODO: map through myTeam, then participants, to gather match data for each member of the team
-      })
+        for (let x = 0; x < myTeam.length; x++) {
+          // console.log(myTeam[x]);
+          for (let z = 0; z < participants.length; z++) {
+            if (myTeam[x].id == participants[z].id) {
+              setLastMatchTeamData(lastMatchTeamData => ([...lastMatchTeamData, participants[z].attributes.stats]))
+            }
+          }
+        }
+        return { myTeam, participants };
+      });
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setLoading(true);
     setLoading(true);
     fetchPlayer(searchName, platform);
   };
@@ -124,6 +130,7 @@ function PubgClient() {
           Get Matches
         </button>
       )}
+      <button onClick={()=> {console.log(lastMatchTeamData)}}>log team data</button>
     </div>
   );
 }
