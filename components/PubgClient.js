@@ -8,7 +8,7 @@ function PubgClient() {
     const [player, setPlayer] = useState(null)
     const [platform, setPlatform] = useState('steam')
     const [matches, setMatches] = useState([])
-    const [searchQuery, setSearchQuery] = useState({ searchName: 'wetfire', searchPlatform: 'steam' })
+    const [searchName, setSearchName] = useState('wetfire')
 
     const fetchPlayer = (player, platform) => {
         axios.get(`https://api.pubg.com/shards/${platform}/players?filter[playerNames]=${player}`, {
@@ -32,10 +32,19 @@ function PubgClient() {
     //     }
     // )
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        let thisPlayer = fetchPlayer(searchQuery.searchName, searchQuery.searchPlatform)
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        let thisPlayer = fetchPlayer(searchName, platform)
         setPlayer(thisPlayer)
+    }
+
+    const handleChange = (e) => {
+        e.preventDefault();
+        setSearchName(e.target.value)
+    }
+
+    const getMatches = () => {
+        
     }
 
     let playerName = ''
@@ -44,10 +53,10 @@ function PubgClient() {
         <div>
             <form onSubmit={handleSubmit}>
                 <label>Search Players</label>
-                <input type="text" value={searchQuery.searchName} onChange={(e) => setSearchQuery(searchQuery.searchName = e.target.value)} />
+                <input type="text" value={searchName} onChange={handleChange} />
                 <button type="submit">submit</button>
                 <div>{playerName}</div>
-                <button onClick={() => console.log(player)}>log</button>
+                <button onClick={() => console.log(player.attributes)}>log</button>
             </form>
         </div>
     )
