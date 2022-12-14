@@ -6,12 +6,12 @@ import { apiKey } from "./Keys";
 import { MatchCard } from "./MatchCard.js";
 import Link from "next/link.js";
 
-function PubgClient() {
+function PubgClient(searchPlayer) {
   const [player, setPlayer] = useState(null);
   const [platform, setPlatform] = useState("steam");
   const [matches, setMatches] = useState(null);
   const [lastMatchTeamData, setLastMatchTeamData] = useState([]);
-  const [searchName, setSearchName] = useState("wetfire");
+  const [searchName, setSearchName] = useState(searchPlayer);
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
   const nameRef = useRef(searchName);
@@ -130,7 +130,6 @@ function PubgClient() {
           Get Matches
         </button>
       )}
-      <button onClick={()=> {console.log(lastMatchTeamData)}}>log team data</button>
     </div>
   );
 }

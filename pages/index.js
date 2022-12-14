@@ -15,7 +15,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <h1>PUBG STATS</h1>
+        <div>PUBG STATS</div>
         <QueryClientProvider client={queryClient}>
           <PubgClient />
         </QueryClientProvider>
