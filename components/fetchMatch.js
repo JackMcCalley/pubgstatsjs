@@ -1,7 +1,8 @@
 import axios from "axios";
+import { useState } from "react";
 
-export const fetchMatch = async (matchId, player, apiKey) => {
-  props.setLastMatchTeamData([]);
+export const fetchMatch = async (matchId, platform, player, apiKey) => {
+  let lastMatch = []
   await axios
     .get(`https://api.pubg.com/shards/${platform}/matches/${matchId}`, {
       method: "GET",
@@ -45,10 +46,8 @@ export const fetchMatch = async (matchId, player, apiKey) => {
         // console.log(myTeam[x]);
         for (let z = 0; z < participants.length; z++) {
           if (myTeam[x].id == participants[z].id) {
-            setLastMatchTeamData((lastMatchTeamData) => [
-              ...lastMatchTeamData,
-              participants[z].attributes.stats,
-            ]);
+            lastMatch = [...lastMatch, participants[z].attributes.stats]
+            console.log(lastMatch);
           }
         }
       }

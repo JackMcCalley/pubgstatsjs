@@ -11,13 +11,17 @@ function PubgClient(searchPlayer) {
   const [platform, setPlatform] = useState("steam");
   const [matches, setMatches] = useState(null);
   const [lastMatchTeamData, setLastMatchTeamData] = useState([]);
-  const [searchName, setSearchName] = useState(searchPlayer);
+  const [searchName, setSearchName] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const [matchesFetched, setMatchesFetched] = useState(false);
   const nameRef = useRef(searchName);
 
   const fetchPlayer = async (player, platform) => {
     setLoading(true);
+    setFetchError(false);
+    setFetched(false);
     await axios
       .get(
         `https://api.pubg.com/shards/${platform}/players?filter[playerNames]=${player}`,
@@ -40,13 +44,15 @@ function PubgClient(searchPlayer) {
           error.response.status +
             " Please Try Again. Note: Searches are case sensitive."
         );
+        setFetchError(true);
       });
     setFetched(true);
     setLoading(false);
   };
 
   const fetchMatch = async (matchId) => {
-    setLastMatchTeamData([])
+    setMatchesFetched(false);
+    setLastMatchTeamData([]);
     await axios
       .get(`https://api.pubg.com/shards/${platform}/matches/${matchId}`, {
         method: "GET",
@@ -90,10 +96,15 @@ function PubgClient(searchPlayer) {
           // console.log(myTeam[x]);
           for (let z = 0; z < participants.length; z++) {
             if (myTeam[x].id == participants[z].id) {
-              setLastMatchTeamData(lastMatchTeamData => ([...lastMatchTeamData, participants[z].attributes.stats]))
+              setLastMatchTeamData((lastMatchTeamData) => [
+                ...lastMatchTeamData,
+                participants[z].attributes.stats,
+              ]);
             }
           }
         }
+        console.log(lastMatchTeamData);
+        setMatchesFetched(true);
         return { myTeam, participants };
       });
   };
@@ -121,14 +132,17 @@ function PubgClient(searchPlayer) {
       <div>
         {loading ? "LOADING..." : fetched ? `Match ID: ${matches}` : "No Data"}
       </div>
-      {fetched ? (
+      {fetched && !fetchError ? (
         <button style={styles.buttons} onClick={() => fetchMatch(matches)}>
           Get Matches
         </button>
       ) : (
-        <button style={styles.buttons} disabled>
-          Get Matches
-        </button>
+        <div></div>
+      )}
+      {matchesFetched ? (
+        <MatchCard matchData={lastMatchTeamData} />
+      ) : (
+        <div></div>
       )}
     </div>
   );

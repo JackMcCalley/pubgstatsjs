@@ -1,14 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react'
-import axios from 'axios'
-import { apiKey } from './Keys'
+import React from "react";
 
-export function MatchCard() { 
-    return(
-        <div>
-            Match Card
-            {/* <h1>{rank}</h1>
-            <h2>{kills}</h2>
-            <h2>{damage}</h2> */}
-        </div>
-    )
-}
+export const MatchCard = (matchData) => {
+  let data = matchData.matchData;
+  console.log(data);
+  return (
+    <div>
+      {data[0].winPlace == 1 ? <h1>WINNER!</h1> : <div></div>}
+      <h1>Team Rank: {data[0].winPlace}</h1>
+      {data.map((player) => {
+          return (
+            <div key={player.name} style={{borderStyle: 'solid', borderWidth: '1px'}}>
+              <h1>{player.name}</h1>
+              <h2>Kills: {player.kills}</h2>
+              <h2>Damage: {player.damageDealt}</h2>
+            </div>
+          );
+      })}
+    </div>
+  );
+};
