@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { apiKey } from "./Keys";
 import { PlayerCard } from "./PlayerCard.js";
-import Link from "next/link.js";
 
 function PubgClient(searchPlayer) {
   const [player, setPlayer] = useState(null);
