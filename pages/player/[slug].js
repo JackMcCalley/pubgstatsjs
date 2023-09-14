@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import { apiKey } from "../../components/Keys";
 import { useQuery } from "@tanstack/react-query";
-import getPlayer from "../../components/getPlayer";
 import { fetchMatch } from "../../components/fetchMatch";
 
 function Player() {

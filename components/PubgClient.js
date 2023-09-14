@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import useDebounce from "../hooks/useDebounce.js";
 import axios from "axios";
 import { apiKey } from "./Keys";
 import { PlayerCard } from "./PlayerCard.js";
