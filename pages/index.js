@@ -1,8 +1,12 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
-import PubgClient from '../components/PubgClient'
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import Head from "next/head";
+import Image from "next/image";
+import styles from "../styles/Home.module.css";
+import PubgClient from "../components/PubgClient";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 const queryClient = new QueryClient();
 
 export default function Home() {
@@ -21,9 +25,7 @@ export default function Home() {
         </QueryClientProvider>
       </main>
 
-      <footer className={styles.footer}>
-        made by jack
-      </footer>
-    </div >
-  )
+      <footer className={styles.footer}>made by jack</footer>
+    </div>
+  );
 }
