@@ -1,12 +1,19 @@
 export function PlayerCard(player) {
-    console.log(player.player)
+  let thisPlayer = player.player;
+  let minutes = Math.floor(thisPlayer.timeSurvived / 60);
+  let seconds = thisPlayer.timeSurvived - minutes * 60;
   return (
-    <div style={{border: '1px solid white', padding: '.5rem 1rem'}}>
-      <h4>{player.player.name}</h4>
-      <p>Kills: {player.player.kills}</p>
-      <p>Kill Rank: {player.player.killPlace}</p>
-      <p>Damage: {player.player.damageDealt}</p>
-      <p>Longest Kill: {player.player.longestKill}m</p>
+    <div style={{ border: "1px solid white", padding: ".5rem 1rem" }}>
+      <h2>{thisPlayer.name}</h2>
+      <p>Kills: {thisPlayer.kills}</p>
+      <p>Assists: {thisPlayer.assists}</p>
+      <p>Kill Rank: {thisPlayer.killPlace}</p>
+      <p>Damage: {thisPlayer.damageDealt}</p>
+      <p>Revives: {thisPlayer.revives}</p>
+      <p>Longest Kill: {thisPlayer.longestKill}m</p>
+      <p>Walking Distance: {thisPlayer.walkDistance}m</p>
+      <p>Driving Distance: {thisPlayer.rideDistance}m</p>
+      <p>Time Survived: {minutes} minutes {seconds} seconds</p>
     </div>
   );
 }

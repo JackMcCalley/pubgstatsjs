@@ -12,6 +12,7 @@ function PubgClient(searchPlayer) {
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
   const nameRef = useRef(searchName);
+  const fetchedRef = useRef(fetched)
 
   const fetchPlayer = async (player, platform) => {
     setLoading(true);
@@ -27,12 +28,12 @@ function PubgClient(searchPlayer) {
         }
       )
       .then((response) => {
+        console.log(response.data.data[0]);
         setPlayer(response.data.data[0]);
         setMatches(response.data.data[0].relationships.matches.data[0].id);
         return response;
       })
       .catch(function (error) {
-        console.log(error.response.status);
         setMatches(
           error.response.status +
             " Please Try Again. Note: Searches are case sensitive."
@@ -108,8 +109,15 @@ function PubgClient(searchPlayer) {
     nameRef.current = e.target.value;
   };
 
+  useEffect(() => {
+    if (fetched == true && loading == false && typeof player !== 'undefined'){
+      fetchMatch(matches);
+    }
+    
+  }, [player])
+
   return (
-    <div>
+    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
       <form onSubmit={handleSubmit}>
         <label>Search Players</label>
         <input type="text" value={searchName} onChange={onChange} />
@@ -120,32 +128,20 @@ function PubgClient(searchPlayer) {
       <div>
         {loading ? "LOADING..." : fetched ? `Match ID: ${matches}` : "No Data"}
       </div>
-      {fetched ? (
-        <>
-          <button style={styles.buttons} onClick={() => fetchMatch(matches)}>
-            Get Matches
-          </button>
-          <button
-            style={styles.buttons}
-            onClick={() => console.log(lastMatchTeamData)}
-          >
-            Log Data
-          </button>
-        </>
-      ) : (
-        <button style={styles.buttons} disabled>
-          Get Matches
-        </button>
-      )}
       {lastMatchTeamData.length == 0 ? (
         <div></div>
       ) : (
         <>
-          <div style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
-            <h2>Rank: {lastMatchTeamData[0].winPlace}</h2>
+          <h2 style={{paddingLeft: '2rem'}}>Rank: {lastMatchTeamData[0].winPlace}</h2>
+          {lastMatchTeamData[0].winPlace == 1 ? (
+            <h1>WINNER WINNER CHICKEN DINNER!</h1>
+          ): (
+           <></> 
+          )}
+          <div style={{ width: "100%", display: "flex", flexDirection: "row" }}>
             {lastMatchTeamData.map(function (player) {
               return (
-                <div style={{padding: '2rem'}} key={player.playerId}>
+                <div style={{ padding: "2rem" }} key={player.playerId}>
                   <PlayerCard player={player} />
                 </div>
               );
